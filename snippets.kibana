@@ -1,10 +1,10 @@
-#delete indexes by wildcard
+#delete indexes by wildcard  
 DELETE /catalog*
 
-#list all indexes
+#list all indexes  
 GET /_search?size=100
 
-#create index with analyzer
+#create index with analyzer  
 PUT /catalog
 {
   "settings": {
