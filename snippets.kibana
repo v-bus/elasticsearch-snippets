@@ -30,6 +30,7 @@ PUT /catalog
     }
   }
 }
+
 #check this analyzer
 #it should remove russian stop-words
 POST /catalog/_analyze
@@ -39,3 +40,64 @@ POST /catalog/_analyze
             "МВД Казахстана назвало дорожный конфликт причиной беспорядков", 
             "Под Челябинском закрывают карантинный пункт после протестов жителей"]
 }
+
+#UPDATE INDEX
+#1st stop index
+POST /catalog/_close
+
+#2nd modify!
+#add analyzer to complete search query
+PUT /catalog/_settings
+{
+ 
+    "analysis": {
+      "analyzer": {
+        "custom_edge_ngram_analiser": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "custom_edge_ngram"]
+        }
+      },
+      "filter": {
+        "custom_edge_ngram": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 10
+        }
+      }
+    }
+}
+#add analyzer to mapping
+PUT /catalog/_mappings
+{
+    "properties": {
+      "product": {
+        "type": "text",
+        "analyzer": "custom_edge_ngram_analiser",
+        "search_analyzer": "standard"
+      }
+    }
+  }
+}
+
+#3rd open index!
+POST /catalog/_open
+
+#add some data
+POST /catalog/_doc
+{
+  "product": "elastic hoola fff"
+}
+
+#search by "ela" word
+GET /catalog/_search
+{
+  "query": {
+    "match": {
+      "product": "ela"
+    }
+  }
+}
+
